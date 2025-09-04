@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repositorio de Conceptos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+        
+        
+        /* --- ESTRUCTURA GENERAL Y FONDO --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body { 
+    font-family: 'Inter', sans-serif; 
+}
+
+.gradient-bg {
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 70%, #001f3f 100%);
+}
+
+.font-logo {
+    font-family: 'Playfair Display', serif;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: 
+        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(167, 139, 250, 0.1) 0%, transparent 20%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* --- CABECERA Y NAVEGACIÓN --- */
+.repo-toggle { 
+    background: rgba(15, 15, 35, 0.7); 
+    border: 1px solid rgba(167, 139, 250, 0.2); 
+    border-radius: 10px; 
+    padding: 4px; 
+    display: flex; 
+    gap: 4px; 
+}
+
+.toggle-btn { 
+    padding: 8px 16px; 
+    border-radius: 8px; 
+    text-decoration: none; 
+    color: #cbd5e1; 
+    font-weight: 500; 
+    transition: all 0.3s ease; 
+    border: 1px solid transparent; 
+}
+.toggle-btn:hover { 
+    background: rgba(30, 30, 46, 0.7); 
+    color: #e2e8f0; 
+}
+.toggle-btn.active { 
+    background: #8B5CF6; 
+    color: white; 
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); 
+}
+
+.category-link {
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
+    background: rgba(15, 15, 35, 0.5);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 10px;
+    color: #cbd5e1;
+}
+.category-link:hover {
+    background: rgba(30, 30, 46, 0.7);
+    border: 1px solid rgba(139, 92, 246, 0.5);
+    color: #e2e8f0;
+}
+
+/* --- COMPONENTES DE LA INTERFAZ --- */
+
+/* Tarjetas de Recursos */
+.resource-card { 
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    backdrop-filter: blur(12px); 
+    background: rgba(30, 30, 46, 0.5); 
+    border: 1px solid rgba(139, 92, 246, 0.3); 
+    box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.3); 
+    border-radius: 16px; 
+    overflow: hidden; 
+    position: relative; 
+}
+
+/* Barra de Búsqueda */
+.search-bar { 
+    background: rgba(15, 15, 35, 0.7); 
+    border: 1px solid rgba(167, 139, 250, 0.2); 
+    border-radius: 12px; 
+    transition: all 0.3s ease; 
+}
+
+/* Modales (Pop-ups) */
+.modal-content { 
+    backdrop-filter: blur(20px); 
+    background: rgba(15, 15, 35, 0.95); 
+    border: 1px solid rgba(167, 139, 250, 0.2); 
+    border-radius: 20px; 
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
+}
+
+/* Formularios (Inputs, Selects) */
+input, select, textarea { 
+    background: rgba(15, 15, 35, 0.8) !important; 
+    border: 1px solid rgba(139, 92, 246, 0.3) !important; 
+    color: #e2e8f0 !important; 
+    border-radius: 10px !important; 
+}
+
+/* Botones */
+.add-btn { 
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); 
+    border: none; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4); 
+    transition: all 0.3s ease; 
+}
+.delete-btn { 
+    position: absolute; 
+    top: 12px; 
+    right: 12px; 
+    background: rgba(100, 100, 100, 0.2); 
+    border: 1px solid rgba(150, 150, 150, 0.4); 
+    border-radius: 50%; 
+    width: 32px; 
+    height: 32px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: pointer; 
+    color: #a0aec0; 
+    transition: all 0.2s ease; 
+}
+.delete-btn:hover { 
+    background: rgba(255, 82, 82, 0.8); 
+    border: 1px solid rgba(255, 82, 82, 1); 
+    color: white; 
+    transform: scale(1.1); 
+}
+
+/* Selector de Íconos del Modal */
+.icon-option { 
+    display: inline-block; 
+    cursor: pointer; 
+}
+.icon-option input { 
+    display: none; 
+}
+.icon-option .icon-preview { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    width: 48px; 
+    height: 48px; 
+    border-radius: 10px; 
+    border: 2px solid rgba(139, 92, 246, 0.3); 
+    color: #cbd5e1; 
+    transition: all 0.2s ease; 
+}
+.icon-option input:checked + .icon-preview { 
+    background: #8B5CF6; 
+    border-color: #a78bfa; 
+    color: white; 
+    transform: scale(1.1); 
+}
+
+/* --- TÍTULOS Y CONTENIDO --- */
+.category-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 1.5rem; 
+    position: relative; 
+}
+
+.section-title {
+    position: relative;
+    display: inline-block;
+}
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 50%;
+    height: 3px;
+    background: linear-gradient(90deg, #8B5CF6, #7C3AED);
+    border-radius: 2px;
+}
+    </style>
+</head>
+<body class="gradient-bg text-slate-200">
+
+    <header class="sticky top-0 z-10 shadow-md backdrop-blur-lg bg-slate-900/50">
+        <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center w-full md:w-auto mb-4 md:mb-0">
+                <h1 class="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-violet-400 font-logo">Repositorio de Sebas</h1>
+            </div>
+
+            <div class="repo-toggle my-4 md:my-0">
+                <a href="videos.html" class="toggle-btn">Videos</a>
+                <a href="conceptos.html" class="toggle-btn active">Conceptos</a>
+            </div>
+
+            <div class="w-full md:w-1/3">
+                <div class="relative"><input type="text" id="search-bar" placeholder="Buscar categorías..." class="search-bar w-full px-4 py-2.5 focus:outline-none"><i data-feather="search" class="absolute right-3 top-3 text-gray-400"></i></div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="bg-slate-900/30 backdrop-blur-md border-b border-purple-500/20 py-4">
+        <div class="container mx-auto px-4"><div id="nav-links-container" class="flex flex-wrap justify-center gap-2 md:gap-4"></div></div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">Conceptos por Categoría</h2>
+            <button id="add-resource-btn" class="add-btn text-white px-4 py-2 rounded-lg flex items-center"><i data-feather="plus" class="mr-2"></i> Añadir Concepto</button>
+        </div>
+        <div id="categories-container"></div>
+    </main>
+
+    <div id="add-resource-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-20">
+        <div class="modal-content w-full max-w-lg p-6">
+            <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold">Añadir Nuevo Concepto</h3><button id="close-modal" class="text-gray-400 hover:text-white"><i data-feather="x"></i></button></div>
+            <form id="add-resource-form">
+                <div class="mb-4"><label class="block text-gray-300 mb-2" for="resource-title">Título o Término</label><input type="text" id="resource-title" class="w-full px-3 py-2" required></div>
+                <div class="mb-4"><label class="block text-gray-300 mb-2" for="resource-content">Contenido o Definición</label><textarea id="resource-content" class="w-full px-3 py-2 h-40" required></textarea></div>
+                <div class="mb-4"><label class="block text-gray-300 mb-2" for="resource-category">Categoría</label><select id="resource-category" class="w-full px-3 py-2" required></select></div>
+                <div class="flex justify-end space-x-3"><button type="button" id="cancel-add" class="px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700">Cancelar</button><button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-purple-600">Añadir Concepto</button></div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="add-category-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-20">
+        <div class="modal-content w-full max-w-md p-6">
+             <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bold">Añadir Nueva Categoría</h3><button id="close-category-modal" class="text-gray-400 hover:text-white"><i data-feather="x"></i></button></div>
+            <form id="add-category-form">
+                <div class="mb-4"><label class="block text-gray-300 mb-2" for="category-name">Nombre de la Categoría</label><input type="text" id="category-name" class="w-full px-3 py-2" placeholder="Ej: Marketing Digital" required></div>
+                <div class="mb-6"><label class="block text-gray-300 mb-3">Selecciona un Ícono</label><div id="icon-selector" class="grid grid-cols-6 gap-2"></div></div>
+                <div class="flex justify-end space-x-3"><button type="button" id="cancel-category-add" class="px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700">Cancelar</button><button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-purple-600">Añadir Categoría</button></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- INICIALIZACIÓN Y ELEMENTOS ---
+            const addResourceBtn = document.getElementById('add-resource-btn');
+            const addCategoryBtn = document.createElement('button');
+            addCategoryBtn.id = 'add-category-btn';
+            addCategoryBtn.className = 'add-btn text-white px-4 py-2 rounded-lg flex items-center';
+            addCategoryBtn.innerHTML = '<i data-feather="plus" class="mr-2"></i> Añadir Categoría';
+        
+            const searchBar = document.getElementById('search-bar');
+            const resourceModal = document.getElementById('add-resource-modal');
+            const categoryModal = document.getElementById('add-category-modal');
+            const addResourceForm = document.getElementById('add-resource-form');
+            const addCategoryForm = document.getElementById('add-category-form');
+            const closeModalBtns = document.querySelectorAll('#close-modal, #close-category-modal, #cancel-add, #cancel-category-add');
+            const categoriesContainer = document.getElementById('categories-container');
+            const navLinksContainer = document.getElementById('nav-links-container');
+            const resourceCategorySelect = document.getElementById('resource-category');
+            const iconSelectorContainer = document.getElementById('icon-selector');
+        
+            const availableIcons = ['book-open', 'help-circle', 'info', 'message-square', 'hash', 'trending-up', 'layout', 'zap', 'cpu', 'mic', 'package', 'briefcase', 'link', 'dollar-sign', 'bar-chart-2', 'pen-tool', 'users', 'award', 'globe'];
+            let repositoryData = [];
+        
+            // --- DATOS INICIALES PARA CONCEPTOS ---
+            const defaultData = [
+                { id: "definiciones-clave", name: "Definiciones Clave", icon: "book-open", resources: [
+                    { title: "Marketing de Contenidos", content: "Es una estrategia de marketing enfocada en crear y distribuir contenido valioso, relevante y consistente para atraer y retener a una audiencia claramente definida." },
+                ]},
+                { id: "ideas-de-negocio", name: "Ideas de Negocio", icon: "zap", resources: [] },
+            ];
+            
+            // --- MANEJO DE DATOS ---
+            const saveData = () => localStorage.setItem('conceptRepository', JSON.stringify(repositoryData));
+            const loadData = () => {
+                const savedData = localStorage.getItem('conceptRepository');
+                repositoryData = savedData ? JSON.parse(savedData) : defaultData;
+            };
+        
+            // --- RENDERIZADO DE LA PÁGINA ---
+            const renderPage = () => {
+                categoriesContainer.innerHTML = '';
+                navLinksContainer.innerHTML = '';
+                resourceCategorySelect.innerHTML = '<option value="">Selecciona una categoría</option>';
+        
+                repositoryData.forEach(category => {
+                    const section = document.createElement('section');
+                    section.id = category.id;
+                    section.className = 'category-section mb-12';
+                    
+                    const resourcesGrid = category.resources.map((resource, index) => `
+                        <div class="resource-card bg-card p-6 flex flex-col">
+                            <button class="delete-btn delete-resource-btn" data-category-id="${category.id}" data-resource-index="${index}" title="Eliminar concepto"><i data-feather="trash-2"></i></button>
+                            <div class="flex items-center mb-3">
+                                <i data-feather="${category.icon || 'hash'}" class="text-purple-400 mr-3"></i>
+                                <h3 class="text-lg font-semibold text-slate-100">${resource.title}</h3>
+                            </div>
+                            <p class="text-slate-300 flex-grow whitespace-pre-wrap break-words">${resource.content}</p>
+                        </div>
+                    `).join('');
+        
+                    // ✅ CORRECCIÓN: Se añadió la clase 'section-title' que faltaba
+                    section.innerHTML = `<div class="category-header"><h2 class="text-2xl font-bold section-title">${category.name}</h2><button class="delete-btn delete-category-btn" data-category-id="${category.id}" title="Eliminar categoría"><i data-feather="trash-2"></i></button></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${resourcesGrid}</div>`;
+                    categoriesContainer.appendChild(section);
+        
+                    const navLink = document.createElement('a');
+                    navLink.href = `#${category.id}`;
+                    navLink.className = 'category-link px-4 py-2';
+                    navLink.textContent = category.name;
+                    navLinksContainer.appendChild(navLink);
+        
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    resourceCategorySelect.appendChild(option);
+                });
+                
+                navLinksContainer.appendChild(addCategoryBtn);
+                feather.replace();
+            };
+            
+            const renderIconSelector = () => {
+                iconSelectorContainer.innerHTML = '';
+                availableIcons.forEach((icon, i) => {
+                    iconSelectorContainer.innerHTML += `<label class="icon-option"><input type="radio" name="category-icon" value="${icon}" ${i===0?'checked':''}><div class="icon-preview" title="${icon}"><i data-feather="${icon}"></i></div></label>`;
+                });
+                feather.replace();
+            };
+        
+            const closeAllModals = () => { resourceModal.classList.add('hidden'); categoryModal.classList.add('hidden'); };
+            addResourceBtn.addEventListener('click', () => resourceModal.classList.remove('hidden'));
+            addCategoryBtn.addEventListener('click', () => { renderIconSelector(); categoryModal.classList.remove('hidden'); });
+            closeModalBtns.forEach(btn => btn.addEventListener('click', closeAllModals));
+        
+            addResourceForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const title = document.getElementById('resource-title').value;
+                const content = document.getElementById('resource-content').value;
+                const categoryId = resourceCategorySelect.value;
+                if (!categoryId) return;
+                const category = repositoryData.find(c => c.id === categoryId);
+                if(category) {
+                    category.resources.unshift({ title, content });
+                    saveData();
+                    renderPage();
+                    closeAllModals();
+                    addResourceForm.reset();
+                }
+            });
+        
+            addCategoryForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('category-name').value;
+                const selectedIcon = document.querySelector('input[name="category-icon"]:checked').value;
+                const id = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+                if (repositoryData.some(c => c.id === id)) return;
+                repositoryData.push({ id, name, icon: selectedIcon, resources: [] });
+                saveData();
+                renderPage();
+                closeAllModals();
+                addCategoryForm.reset();
+            });
+        
+            categoriesContainer.addEventListener('click', e => {
+                const delResBtn = e.target.closest('.delete-resource-btn');
+                if (delResBtn && confirm('¿Eliminar este concepto?')) {
+                    const { categoryId, resourceIndex } = delResBtn.dataset;
+                    const cat = repositoryData.find(c => c.id === categoryId);
+                    cat.resources.splice(resourceIndex, 1);
+                    saveData();
+                    renderPage();
+                }
+                const delCatBtn = e.target.closest('.delete-category-btn');
+                if (delCatBtn && confirm('¿Eliminar esta categoría y todo su contenido?')) {
+                    const { categoryId } = delCatBtn.dataset;
+                    repositoryData = repositoryData.filter(c => c.id !== categoryId);
+                    saveData();
+                    renderPage();
+                }
+            });
+            
+            searchBar.addEventListener('input', () => {
+                const searchTerm = searchBar.value.toLowerCase().trim();
+                document.querySelectorAll('.category-section').forEach(section => {
+                    const titleElement = section.querySelector('.section-title');
+                    if (titleElement) {
+                        const title = titleElement.textContent.toLowerCase();
+                        section.style.display = title.includes(searchTerm) ? 'block' : 'none';
+                    }
+                });
+            });
+        
+            // --- INICIO DE LA APLICACIÓN ---
+            loadData();
+            renderPage();
+            feather.replace();
+        });
+        </script>
+</body>
+</html>
