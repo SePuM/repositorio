@@ -378,8 +378,9 @@
     const tolerance = 5; 
 
     // ✅ CORRECCIÓN: Se añade la misma tolerancia a la flecha izquierda
-    scrollLeftBtn.classList.toggle('hidden', scrollLeft <= tolerance);
-    
+    scrollLeftBtn.classList.toggle('hidden', scrollLeft < 1);
+
+    // Derecha mantiene la tolerancia para evitar problemas al final
     scrollRightBtn.classList.toggle('hidden', scrollLeft >= maxScrollLeft - tolerance);
 };
 
@@ -542,6 +543,7 @@ window.addEventListener('resize', updateArrowVisibility);
 </script>
 </body>
 </html>
+
 
 
 
