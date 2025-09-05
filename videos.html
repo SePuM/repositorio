@@ -55,6 +55,14 @@
             border: 1px solid rgba(139, 92, 246, 0.7);
             background: rgba(30, 30, 46, 0.7);
         }
+        /* Oculta la barra de scroll en el carrusel de categorías */
+#nav-links-container::-webkit-scrollbar {
+    display: none; /* Para Chrome, Safari y Opera */
+}
+#nav-links-container {
+    -ms-overflow-style: none;  /* Para Internet Explorer y Edge */
+    scrollbar-width: none;  /* Para Firefox */
+}
         .search-bar {
             background: rgba(15, 15, 35, 0.7);
             border: 1px solid rgba(167, 139, 250, 0.2);
@@ -482,5 +490,6 @@
     </script>
 </body>
 </html>
+
 
 
