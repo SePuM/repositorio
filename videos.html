@@ -251,7 +251,6 @@
 
     <nav class="bg-slate-900/30 backdrop-blur-md border-b border-purple-500/20 py-2">
     <div class="container mx-auto px-4 flex items-center gap-2">
-        
         <button id="scroll-left-btn" class="scroll-arrow hidden">
             <i data-feather="chevron-left"></i>
         </button>
@@ -263,6 +262,10 @@
             <i data-feather="chevron-right"></i>
         </button>
 
+        <button id="add-category-btn" class="add-btn text-white px-4 py-2 rounded-lg flex items-center flex-shrink-0">
+            <i data-feather="plus" class="mr-2"></i>
+            <span class="hidden md:inline">Añadir Categoría</span>
+        </button>
     </div>
 </nav>
 
@@ -338,10 +341,7 @@
         const scrollLeftBtn = document.getElementById('scroll-left-btn');
         const scrollRightBtn = document.getElementById('scroll-right-btn');
         const addResourceBtn = document.getElementById('add-resource-btn');
-        const addCategoryBtn = document.createElement('button');
-        addCategoryBtn.id = 'add-category-btn';
-        addCategoryBtn.className = 'add-btn text-white px-4 py-2 rounded-lg flex items-center';
-        addCategoryBtn.innerHTML = '<i data-feather="plus" class="mr-2"></i> Añadir Categoría';
+        const addCategoryBtn = document.getElementById('add-category-btn');
         
         const searchBar = document.getElementById('search-bar');
         const resourceModal = document.getElementById('add-resource-modal');
@@ -432,7 +432,7 @@
                 resourceCategorySelect.appendChild(option);
             });
             
-            navLinksContainer.appendChild(addCategoryBtn);
+            
             feather.replace();
             setTimeout(updateArrowVisibility, 100)
         };
@@ -542,6 +542,7 @@ window.addEventListener('resize', updateArrowVisibility);
 </script>
 </body>
 </html>
+
 
 
 
