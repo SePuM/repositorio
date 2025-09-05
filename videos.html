@@ -375,7 +375,8 @@
 
     const scrollLeft = container.scrollLeft;
     const maxScrollLeft = container.scrollWidth - container.clientWidth;
-    const tolerance = 2; // Pequeño margen para cálculos
+    
+    const tolerance = 5; 
 
     scrollLeftBtn.classList.toggle('hidden', scrollLeft <= tolerance);
     scrollRightBtn.classList.toggle('hidden', scrollLeft >= maxScrollLeft - tolerance);
@@ -540,6 +541,7 @@ window.addEventListener('resize', updateArrowVisibility);
 </script>
 </body>
 </html>
+
 
 
 
