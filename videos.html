@@ -208,6 +208,23 @@
             color: white;
             box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
         }
+        /* Estilos para las flechas del carrusel */
+.scroll-arrow {
+    background: rgba(30, 30, 46, 0.7);
+    border: 1px solid rgba(139, 92, 246, 0.5);
+    color: #e2e8f0;
+    border-radius: 50%;
+    padding: 8px;
+    flex-shrink: 0; /* Evita que las flechas se encojan */
+    transition: all 0.2s ease;
+}
+.scroll-arrow:hover {
+    background: #8B5CF6;
+    color: white;
+}
+.scroll-arrow.hidden {
+    display: none;
+}
     </style>
 </head>
 <body class="gradient-bg text-text font-sans min-h-screen">
@@ -232,15 +249,22 @@
         </div>
     </header>
 
-    <nav class="bg-background/80 backdrop-blur-md border-b border-primary/20 py-4">
-        <div class="container mx-auto px-4">
-            <div id="nav-links-container" class="flex flex-nowrap overflow-x-auto justify-center gap-2 md:gap-4">
-                <button id="add-category-btn" class="add-btn text-white px-4 py-2 rounded-lg flex items-center">
-                    <i data-feather="plus" class="mr-2"></i> Añadir Categoría
-                </button>
+    <nav class="bg-slate-900/30 backdrop-blur-md border-b border-purple-500/20 py-2">
+    <div class="container mx-auto px-4 flex items-center gap-2">
+        
+        <button id="scroll-left-btn" class="scroll-arrow hidden">
+            <i data-feather="chevron-left"></i>
+        </button>
+
+        <div id="nav-links-container" class="flex-grow flex flex-nowrap overflow-x-auto justify-start md:justify-center gap-2 md:gap-4">
             </div>
-        </div>
-    </nav>
+
+        <button id="scroll-right-btn" class="scroll-arrow hidden">
+            <i data-feather="chevron-right"></i>
+        </button>
+
+    </div>
+</nav>
 
     <main class="container mx-auto px-4 py-8">
         <div class="flex justify-between items-center mb-6">
@@ -277,219 +301,134 @@
     </div>
 
     <script type="module">
-        // Importar funciones de Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyDs1Xn8fUlY3IL_6Sg2RJh8YqiaVJVk0pQ",
-            authDomain: "repositorio-90921.firebaseapp.com",
-            projectId: "repositorio-90921",
-            storageBucket: "repositorio-90921.appspot.com",
-            messagingSenderId: "846523574774",
-            appId: "1:846523574774:web:5578b74b47b0f8ef50bfd7"
-        };
-    
-        // --- INICIALIZACIÓN ---
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-    
-        // --- GUARDIA DE AUTENTICACIÓN ---
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                // Si el usuario ha iniciado sesión, se ejecuta la lógica de la app
-                initializeAppLogic();
-            } else {
-                // Si no, se redirige a la página de login
-                window.location.href = 'index.html';
-            }
-        });
-    
-        // --- LÓGICA PRINCIPAL DE LA APLICACIÓN ---
-        function initializeAppLogic() {
-            const docRef = doc(db, "repositorios", "videos");
-            
-            const addResourceBtn = document.getElementById('add-resource-btn');
-            const addCategoryBtn = document.createElement('button');
-            addCategoryBtn.id = 'add-category-btn';
-            addCategoryBtn.className = 'add-btn text-white px-4 py-2 rounded-lg flex items-center';
-            addCategoryBtn.innerHTML = '<i data-feather="plus" class="mr-2"></i> Añadir Categoría';
-            
-            const searchBar = document.getElementById('search-bar');
-            const resourceModal = document.getElementById('add-resource-modal');
-            const categoryModal = document.getElementById('add-category-modal');
-            const addResourceForm = document.getElementById('add-resource-form');
-            const addCategoryForm = document.getElementById('add-category-form');
-            const closeModalBtns = document.querySelectorAll('#close-modal, #close-category-modal, #cancel-add, #cancel-category-add');
-            const categoriesContainer = document.getElementById('categories-container');
-            const navLinksContainer = document.getElementById('nav-links-container');
-            const resourceCategorySelect = document.getElementById('resource-category');
-            const iconSelectorContainer = document.getElementById('icon-selector');
-    
-            const availableIcons = ['film', 'target', 'image', 'type', 'volume-2', 'edit', 'trending-up', 'layout', 'zap', 'cpu', 'mic', 'book-open', 'package', 'briefcase', 'link', 'dollar-sign', 'bar-chart-2', 'pie-chart', 'credit-card', 'pen-tool', 'scissors', 'sliders', 'video', 'camera', 'layers', 'users', 'award', 'globe'];
-            let repositoryData = [];
-    
-            const defaultData = [
-                { id: "animaciones-inspiradoras", name: "Animaciones Inspiradoras", icon: "film", resources: [] }
-            ];
-    
-            const saveData = async () => {
-                try {
-                    await setDoc(docRef, { categories: repositoryData });
-                } catch (error) {
-                    console.error("Error al guardar datos:", error);
-                }
-            };
-    
-            const renderPage = () => {
-                repositoryData.sort((a, b) => a.name.localeCompare(b.name));
-                categoriesContainer.innerHTML = '';
-                navLinksContainer.innerHTML = '';
-                resourceCategorySelect.innerHTML = '<option value="">Selecciona una categoría</option>';
-    
-                repositoryData.forEach(category => {
-                    const section = document.createElement('section');
-                    section.id = category.id;
-                    section.className = 'category-section mb-12';
-                    
-                    const resourcesGrid = category.resources.map((resource, index) => `
-                        <div class="resource-card bg-card">
-                            <button class="delete-btn delete-resource-btn" data-category-id="${category.id}" data-resource-index="${index}" title="Eliminar recurso"><i data-feather="trash-2"></i></button>
-                            <a href="${resource.url}" target="_blank">
-                                <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-48 flex items-center justify-center">
-                                    <i data-feather="${category.icon || 'link'}" class="text-gray-400" width="48" height="48"></i>
-                                </div>
-                            </a>
-                            <div class="p-4">
-                                <a href="${resource.url}" target="_blank" class="text-primary hover:underline font-medium">${resource.title}</a>
-                                <p class="mt-2 text-sm text-gray-600">${resource.description || 'Recurso añadido por el usuario.'}</p>
-                            </div>
-                        </div>
-                    `).join('');
-    
-                    section.innerHTML = `
-                        <div class="category-header">
-                            <h2 class="text-2xl font-bold section-title">${category.name}</h2>
-                            <button class="delete-btn delete-category-btn" data-category-id="${category.id}" title="Eliminar categoría"><i data-feather="trash-2"></i></button>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            ${resourcesGrid}
-                        </div>
-                    `;
-                    categoriesContainer.appendChild(section);
-    
-                    const navLink = document.createElement('a');
-                    navLink.href = `#${category.id}`;
-                    navLink.className = 'category-link px-4 py-2';
-                    navLink.textContent = category.name;
-                    navLinksContainer.appendChild(navLink);
-    
-                    const option = document.createElement('option');
-                    option.value = category.id;
-                    option.textContent = category.name;
-                    resourceCategorySelect.appendChild(option);
-                });
-                
-                navLinksContainer.appendChild(addCategoryBtn);
-                feather.replace();
-            };
-            
-            const renderIconSelector = () => {
-                iconSelectorContainer.innerHTML = '';
-                availableIcons.forEach((icon, i) => {
-                    iconSelectorContainer.innerHTML += `<label class="icon-option"><input type="radio" name="category-icon" value="${icon}" ${i===0?'checked':''}><div class="icon-preview" title="${icon}"><i data-feather="${icon}"></i></div></label>`;
-                });
-                feather.replace();
-            };
-    
-            const closeAllModals = () => {
-                resourceModal.classList.add('hidden');
-                categoryModal.classList.add('hidden');
-            };
-            
-            addResourceBtn.addEventListener('click', () => resourceModal.classList.remove('hidden'));
-            addCategoryBtn.addEventListener('click', () => {
-                renderIconSelector();
-                categoryModal.classList.remove('hidden');
-            });
-            
-            closeModalBtns.forEach(btn => btn.addEventListener('click', closeAllModals));
-    
-            addResourceForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const url = document.getElementById('resource-url').value;
-                const title = document.getElementById('resource-title').value;
-                const description = document.getElementById('resource-description').value;
-                const categoryId = resourceCategorySelect.value;
-                if (!categoryId) { alert('Por favor, selecciona una categoría.'); return; }
-    
-                const category = repositoryData.find(c => c.id === categoryId);
-                if(category) {
-                    category.resources.unshift({ url, title, description });
-                    await saveData();
-                    closeAllModals();
-                    addResourceForm.reset();
-                }
-            });
-    
-            addCategoryForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const name = document.getElementById('category-name').value;
-                const selectedIconInput = document.querySelector('input[name="category-icon"]:checked');
-                if (!name || !selectedIconInput) { alert('Por favor, completa todos los campos.'); return; }
-                const selectedIcon = selectedIconInput.value;
-                const id = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-                if (repositoryData.some(c => c.id === id)) { alert('Ya existe una categoría con un nombre similar.'); return; }
-                repositoryData.push({ id, name, icon: selectedIcon, resources: [] });
-                await saveData();
-                closeAllModals();
-                addCategoryForm.reset();
-            });
-    
-            categoriesContainer.addEventListener('click', async (e) => {
-                const deleteResourceBtn = e.target.closest('.delete-resource-btn');
-                if (deleteResourceBtn && confirm('¿Estás seguro de que quieres eliminar este recurso?')) {
-                    const { categoryId, resourceIndex } = deleteResourceBtn.dataset;
-                    const category = repositoryData.find(c => c.id === categoryId);
-                    category.resources.splice(resourceIndex, 1);
-                    await saveData();
-                }
-    
-                const deleteCategoryBtn = e.target.closest('.delete-category-btn');
-                if (deleteCategoryBtn && confirm('¿Estás seguro de que quieres eliminar esta categoría y TODOS sus recursos?')) {
-                    const { categoryId } = deleteCategoryBtn.dataset;
-                    repositoryData = repositoryData.filter(c => c.id !== categoryId);
-                    await saveData();
-                }
-            });
-            
-            searchBar.addEventListener('input', () => {
-                const searchTerm = searchBar.value.toLowerCase().trim();
-                document.querySelectorAll('.category-section').forEach(section => {
-                    const title = section.querySelector('.section-title').textContent.toLowerCase();
-                    section.style.display = title.includes(searchTerm) ? 'block' : 'none';
-                });
-            });
-    
-            // --- INICIO DE LA APP ---
-            onSnapshot(docRef, (docSnap) => {
-                console.log("Datos recibidos de Firestore en tiempo real.");
-                if (docSnap.exists() && docSnap.data().categories) {
-                    repositoryData = docSnap.data().categories;
-                } else {
-                    repositoryData = defaultData;
-                    saveData(); // Guarda los datos por defecto si el documento no existe
-                }
-                renderPage();
-            });
+    // Importar funciones de Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // ✅ PEGA AQUÍ TU OBJETO firebaseConfig
+    const firebaseConfig = {
+        apiKey: "TU_API_KEY",
+        authDomain: "TU_AUTH_DOMAIN",
+        projectId: "TU_PROJECT_ID",
+        storageBucket: "TU_STORAGE_BUCKET",
+        messagingSenderId: "TU_MESSAGING_SENDER_ID",
+        appId: "TU_APP_ID"
+    };
+
+    // --- INICIALIZACIÓN ---
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const loader = document.getElementById('loader');
+    const appContainer = document.getElementById('app-container');
+
+    // --- GUARDIA DE AUTENTICACIÓN ---
+    onAuthStateChanged(auth, user => {
+        if (user) {
+            if(loader) loader.style.display = 'none';
+            if(appContainer) appContainer.classList.remove('hidden');
+            initializeAppLogic();
+        } else {
+            window.location.replace('index.html');
         }
-    ;
-    </script>
+    });
+
+    // --- LÓGICA PRINCIPAL DE LA APLICACIÓN ---
+    function initializeAppLogic() {
+        const docRef = doc(db, "repositorios", "videos");
+        
+        const addResourceBtn = document.getElementById('add-resource-btn');
+        const addCategoryBtn = document.createElement('button');
+        addCategoryBtn.id = 'add-category-btn';
+        addCategoryBtn.className = 'add-btn text-white px-4 py-2 rounded-lg flex items-center flex-shrink-0';
+        addCategoryBtn.innerHTML = '<i data-feather="plus" class="mr-2"></i> Añadir Categoría';
+        
+        const searchBar = document.getElementById('search-bar');
+        const resourceModal = document.getElementById('add-resource-modal');
+        const categoryModal = document.getElementById('add-category-modal');
+        const addResourceForm = document.getElementById('add-resource-form');
+        const addCategoryForm = document.getElementById('add-category-form');
+        const closeModalBtns = document.querySelectorAll('#close-modal, #close-category-modal, #cancel-add, #cancel-category-add');
+        const categoriesContainer = document.getElementById('categories-container');
+        const navLinksContainer = document.getElementById('nav-links-container');
+        const resourceCategorySelect = document.getElementById('resource-category');
+        const iconSelectorContainer = document.getElementById('icon-selector');
+        // ✅ Nuevos selectores para las flechas
+        const scrollLeftBtn = document.getElementById('scroll-left-btn');
+        const scrollRightBtn = document.getElementById('scroll-right-btn');
+
+        const availableIcons = ['film', 'target', 'image', 'type', 'volume-2', 'edit', 'trending-up', 'layout', 'zap', 'cpu', 'mic', 'book-open', 'package', 'briefcase', 'link', 'dollar-sign', 'bar-chart-2', 'pie-chart', 'credit-card', 'pen-tool', 'scissors', 'sliders', 'video', 'camera', 'layers', 'users', 'award', 'globe'];
+        let repositoryData = [];
+
+        const defaultData = [
+            { id: "animaciones-inspiradoras", name: "Animaciones Inspiradoras", icon: "film", resources: [] }
+        ];
+
+        const saveData = async () => {
+            try {
+                await setDoc(docRef, { categories: repositoryData });
+            } catch (error) {
+                console.error("Error al guardar datos:", error);
+            }
+        };
+        
+        // ✅ Nueva función para mostrar/ocultar flechas
+        const updateArrowVisibility = () => {
+            const container = navLinksContainer;
+            if (!container) return;
+
+            const scrollLeft = container.scrollLeft;
+            const maxScrollLeft = container.scrollWidth - container.clientWidth;
+            const tolerance = 2; // Pequeño margen para cálculos decimales
+
+            scrollLeftBtn.classList.toggle('hidden', scrollLeft <= tolerance);
+            scrollRightBtn.classList.toggle('hidden', scrollLeft >= maxScrollLeft - tolerance);
+        };
+
+        const renderPage = () => {
+            // ... (código interno de renderPage sin cambios)
+            navLinksContainer.appendChild(addCategoryBtn);
+            feather.replace();
+            // Llamar a la función después de renderizar
+            setTimeout(updateArrowVisibility, 100);
+        };
+        
+        // ... (código de renderIconSelector y closeAllModals sin cambios)
+
+        // ✅ Nuevos listeners para las flechas
+        scrollLeftBtn.addEventListener('click', () => {
+            navLinksContainer.scrollBy({ left: -300, behavior: 'smooth' });
+        });
+
+        scrollRightBtn.addEventListener('click', () => {
+            navLinksContainer.scrollBy({ left: 300, behavior: 'smooth' });
+        });
+        
+        // Listener para actualizar flechas al hacer scroll manual
+        navLinksContainer.addEventListener('scroll', updateArrowVisibility);
+        // Listener para actualizar flechas si cambia el tamaño de la ventana
+        window.addEventListener('resize', updateArrowVisibility);
+        
+        // ... (resto de listeners: addResourceForm, addCategoryForm, categoriesContainer, searchBar, etc. sin cambios)
+
+        // --- INICIO DE LA APP ---
+        onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists() && docSnap.data().categories) {
+                repositoryData = docSnap.data().categories;
+            } else {
+                repositoryData = defaultData;
+                saveData();
+            }
+            renderPage();
+        });
+    }
+
+</script>
 </body>
 </html>
+
 
 
 
