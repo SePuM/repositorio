@@ -335,7 +335,8 @@
     // --- LÓGICA PRINCIPAL DE LA APLICACIÓN ---
     function initializeAppLogic() {
         const docRef = doc(db, "repositorios", "videos");
-        
+        const scrollLeftBtn = document.getElementById('scroll-left-btn');
+        const scrollRightBtn = document.getElementById('scroll-right-btn');
         const addResourceBtn = document.getElementById('add-resource-btn');
         const addCategoryBtn = document.createElement('button');
         addCategoryBtn.id = 'add-category-btn';
@@ -367,6 +368,18 @@
                 console.error("Error al guardar datos:", error);
             }
         };
+
+        const updateArrowVisibility = () => {
+    const container = navLinksContainer;
+    if (!container) return;
+
+    const scrollLeft = container.scrollLeft;
+    const maxScrollLeft = container.scrollWidth - container.clientWidth;
+    const tolerance = 2; // Pequeño margen para cálculos
+
+    scrollLeftBtn.classList.toggle('hidden', scrollLeft <= tolerance);
+    scrollRightBtn.classList.toggle('hidden', scrollLeft >= maxScrollLeft - tolerance);
+};
 
         const renderPage = () => {
             repositoryData.sort((a, b) => a.name.localeCompare(b.name));
@@ -419,6 +432,7 @@
             
             navLinksContainer.appendChild(addCategoryBtn);
             feather.replace();
+            setTimeout(updateArrowVisibility, 100)
         };
         
         const renderIconSelector = () => {
@@ -458,6 +472,18 @@
                 addResourceForm.reset();
             }
         });
+
+        // Listeners para las flechas y el scroll
+scrollLeftBtn.addEventListener('click', () => {
+    navLinksContainer.scrollBy({ left: -300, behavior: 'smooth' });
+});
+
+scrollRightBtn.addEventListener('click', () => {
+    navLinksContainer.scrollBy({ left: 300, behavior: 'smooth' });
+});
+
+navLinksContainer.addEventListener('scroll', updateArrowVisibility);
+window.addEventListener('resize', updateArrowVisibility);
 
         addCategoryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -514,6 +540,7 @@
 </script>
 </body>
 </html>
+
 
 
 
