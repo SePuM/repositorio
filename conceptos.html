@@ -27,7 +27,14 @@ body {
 .font-logo {
     font-family: 'Playfair Display', serif;
 }
-
+/* Oculta la barra de scroll en el carrusel de categorías */
+#nav-links-container::-webkit-scrollbar {
+    display: none; /* Para Chrome, Safari y Opera */
+}
+#nav-links-container {
+    -ms-overflow-style: none;  /* Para Internet Explorer y Edge */
+    scrollbar-width: none;  /* Para Firefox */
+}
 body::before {
     content: '';
     position: fixed;
@@ -441,6 +448,7 @@ input, select, textarea {
 </body>
 
 </html>
+
 
 
 
