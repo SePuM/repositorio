@@ -333,6 +333,8 @@ input, select, textarea {
         const scrollLeftBtn = document.getElementById('scroll-left-btn');
 const scrollRightBtn = document.getElementById('scroll-right-btn');
         const docRef = doc(db, "repositorios", "conceptos");
+
+        const searchBar = document.getElementById('search-bar');
         
         const addResourceBtn = document.getElementById('add-resource-btn');
         const addCategoryBtn = document.getElementById('add-category-btn');
@@ -450,6 +452,22 @@ const scrollRightBtn = document.getElementById('scroll-right-btn');
             }
         });
 
+        searchBar.addEventListener('input', () => {
+    // 1. Obtiene el texto del buscador y lo normaliza (minúsculas, sin espacios)
+    const searchTerm = searchBar.value.toLowerCase().trim();
+
+    // 2. Busca todas las secciones de categorías en la página
+    document.querySelectorAll('.category-section').forEach(section => {
+        
+        // 3. Obtiene el título de la sección actual y lo normaliza
+        const title = section.querySelector('.section-title').textContent.toLowerCase();
+        
+        // 4. Comprueba si el título incluye el término de búsqueda
+        // y muestra u oculta la sección según el resultado.
+        section.style.display = title.includes(searchTerm) ? 'block' : 'none';
+    });
+});
+
         // Listeners para las flechas y el scroll
 scrollLeftBtn.addEventListener('click', () => {
     navLinksContainer.scrollBy({ left: -300, behavior: 'smooth' });
@@ -507,6 +525,7 @@ window.addEventListener('resize', updateArrowVisibility);
 </body>
 
 </html>
+
 
 
 
