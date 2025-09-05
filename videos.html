@@ -268,12 +268,48 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- INICIALIZACIÓN Y SELECCIÓN DE ELEMENTOS ---
-            AOS.init({ duration: 800, once: true, offset: 100 });
+    <script type="module">
+        // Importar funciones de Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    
+        // ✅ PEGA AQUÍ TU OBJETO firebaseConfig
+        const firebaseConfig = {
+            apiKey: "AIzaSyDs1Xn8fUlY3IL_6Sg2RJh8YqiaVJVk0pQ",
+            authDomain: "repositorio-90921.firebaseapp.com",
+            projectId: "repositorio-90921",
+            storageBucket: "repositorio-90921.appspot.com",
+            messagingSenderId: "846523574774",
+            appId: "1:846523574774:web:5578b74b47b0f8ef50bfd7"
+        };
+    
+        // --- INICIALIZACIÓN ---
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+    
+        // --- GUARDIA DE AUTENTICACIÓN ---
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                // Si el usuario ha iniciado sesión, se ejecuta la lógica de la app
+                initializeAppLogic();
+            } else {
+                // Si no, se redirige a la página de login
+                window.location.href = 'index.html';
+            }
+        });
+    
+        // --- LÓGICA PRINCIPAL DE LA APLICACIÓN ---
+        function initializeAppLogic() {
+            const docRef = doc(db, "repositorios", "videos");
+            
             const addResourceBtn = document.getElementById('add-resource-btn');
-            const addCategoryBtn = document.getElementById('add-category-btn');
+            const addCategoryBtn = document.createElement('button');
+            addCategoryBtn.id = 'add-category-btn';
+            addCategoryBtn.className = 'add-btn text-white px-4 py-2 rounded-lg flex items-center';
+            addCategoryBtn.innerHTML = '<i data-feather="plus" class="mr-2"></i> Añadir Categoría';
+            
             const searchBar = document.getElementById('search-bar');
             const resourceModal = document.getElementById('add-resource-modal');
             const categoryModal = document.getElementById('add-category-modal');
@@ -284,42 +320,27 @@
             const navLinksContainer = document.getElementById('nav-links-container');
             const resourceCategorySelect = document.getElementById('resource-category');
             const iconSelectorContainer = document.getElementById('icon-selector');
-        
-            // Lista de íconos disponibles para nuevas categorías
+    
             const availableIcons = ['film', 'target', 'image', 'type', 'volume-2', 'edit', 'trending-up', 'layout', 'zap', 'cpu', 'mic', 'book-open', 'package', 'briefcase', 'link', 'dollar-sign', 'bar-chart-2', 'pie-chart', 'credit-card', 'pen-tool', 'scissors', 'sliders', 'video', 'camera', 'layers', 'users', 'award', 'globe'];
-            
-            // --- ESTRUCTURA DE DATOS PRINCIPAL ---
             let repositoryData = [];
-        
-            // --- DATOS INICIALES PARA VIDEOS ---
+    
             const defaultData = [
-                { id: "animaciones-inspiradoras", name: "Animaciones Inspiradoras", icon: "film", resources: [
-                    { url: "#", title: "Transiciones dinámicas para videos en TikTok", description: "Colección de transiciones que harán que tus videos de TikTok destaquen." },
-                    { url: "#", title: "Animaciones de texto impactantes para Reels", description: "Animaciones de texto que captan la atención en los primeros segundos." }
-                ]},
-                { id: "ideas-de-publicidad", name: "Ideas de Publicidad", icon: "target", resources: [] },
-                { id: "imagenes-de-stock", name: "Imágenes de Stock", icon: "image", resources: [] },
-                { id: "fuentes-creativas", name: "Fuentes Creativas", icon: "type", resources: [] },
+                { id: "animaciones-inspiradoras", name: "Animaciones Inspiradoras", icon: "film", resources: [] }
             ];
-            
-            // --- FUNCIONES DE MANEJO DE DATOS ---
-            const saveData = () => {
-                // ✅ CAMBIO: Se usa 'videoRepository' como clave única para esta página.
-                localStorage.setItem('videoRepository', JSON.stringify(repositoryData));
+    
+            const saveData = async () => {
+                try {
+                    await setDoc(docRef, { categories: repositoryData });
+                } catch (error) {
+                    console.error("Error al guardar datos:", error);
+                }
             };
-        
-            const loadData = () => {
-                // ✅ CAMBIO: Se busca 'videoRepository' para cargar los datos correctos.
-                const savedData = localStorage.getItem('videoRepository');
-                repositoryData = savedData ? JSON.parse(savedData) : defaultData;
-            };
-        
-            // --- FUNCIÓN PRINCIPAL PARA RENDERIZAR LA PÁGINA ---
+    
             const renderPage = () => {
                 categoriesContainer.innerHTML = '';
                 navLinksContainer.innerHTML = '';
                 resourceCategorySelect.innerHTML = '<option value="">Selecciona una categoría</option>';
-        
+    
                 repositoryData.forEach(category => {
                     const section = document.createElement('section');
                     section.id = category.id;
@@ -339,7 +360,7 @@
                             </div>
                         </div>
                     `).join('');
-        
+    
                     section.innerHTML = `
                         <div class="category-header">
                             <h2 class="text-2xl font-bold section-title">${category.name}</h2>
@@ -350,13 +371,13 @@
                         </div>
                     `;
                     categoriesContainer.appendChild(section);
-        
+    
                     const navLink = document.createElement('a');
                     navLink.href = `#${category.id}`;
                     navLink.className = 'category-link px-4 py-2';
                     navLink.textContent = category.name;
                     navLinksContainer.appendChild(navLink);
-        
+    
                     const option = document.createElement('option');
                     option.value = category.id;
                     option.textContent = category.name;
@@ -367,21 +388,14 @@
                 feather.replace();
             };
             
-            // Cargar los íconos en el selector
             const renderIconSelector = () => {
                 iconSelectorContainer.innerHTML = '';
-                availableIcons.forEach((icon, index) => {
-                    const isChecked = index === 0 ? 'checked' : '';
-                    iconSelectorContainer.innerHTML += `
-                        <label class="icon-option">
-                            <input type="radio" name="category-icon" value="${icon}" ${isChecked}>
-                            <div class="icon-preview" title="${icon}"><i data-feather="${icon}"></i></div>
-                        </label>`;
+                availableIcons.forEach((icon, i) => {
+                    iconSelectorContainer.innerHTML += `<label class="icon-option"><input type="radio" name="category-icon" value="${icon}" ${i===0?'checked':''}><div class="icon-preview" title="${icon}"><i data-feather="${icon}"></i></div></label>`;
                 });
                 feather.replace();
             };
-        
-            // --- MANEJO DE MODALES ---
+    
             const closeAllModals = () => {
                 resourceModal.classList.add('hidden');
                 categoryModal.classList.add('hidden');
@@ -394,64 +408,55 @@
             });
             
             closeModalBtns.forEach(btn => btn.addEventListener('click', closeAllModals));
-            window.addEventListener('click', e => (e.target === resourceModal || e.target === categoryModal) && closeAllModals());
-        
-            // --- LÓGICA DE EVENTOS (AÑADIR/ELIMINAR) ---
-            addResourceForm.addEventListener('submit', (e) => {
+    
+            addResourceForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const url = document.getElementById('resource-url').value;
                 const title = document.getElementById('resource-title').value;
                 const description = document.getElementById('resource-description').value;
                 const categoryId = resourceCategorySelect.value;
                 if (!categoryId) { alert('Por favor, selecciona una categoría.'); return; }
-        
+    
                 const category = repositoryData.find(c => c.id === categoryId);
                 if(category) {
                     category.resources.unshift({ url, title, description });
-                    saveData();
-                    renderPage();
+                    await saveData();
                     closeAllModals();
                     addResourceForm.reset();
                 }
             });
-        
-            addCategoryForm.addEventListener('submit', (e) => {
+    
+            addCategoryForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const name = document.getElementById('category-name').value;
                 const selectedIconInput = document.querySelector('input[name="category-icon"]:checked');
                 if (!name || !selectedIconInput) { alert('Por favor, completa todos los campos.'); return; }
-                
                 const selectedIcon = selectedIconInput.value;
                 const id = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
                 if (repositoryData.some(c => c.id === id)) { alert('Ya existe una categoría con un nombre similar.'); return; }
-                
                 repositoryData.push({ id, name, icon: selectedIcon, resources: [] });
-                saveData();
-                renderPage();
+                await saveData();
                 closeAllModals();
                 addCategoryForm.reset();
             });
-        
-            categoriesContainer.addEventListener('click', e => {
+    
+            categoriesContainer.addEventListener('click', async (e) => {
                 const deleteResourceBtn = e.target.closest('.delete-resource-btn');
                 if (deleteResourceBtn && confirm('¿Estás seguro de que quieres eliminar este recurso?')) {
                     const { categoryId, resourceIndex } = deleteResourceBtn.dataset;
                     const category = repositoryData.find(c => c.id === categoryId);
                     category.resources.splice(resourceIndex, 1);
-                    saveData();
-                    renderPage();
+                    await saveData();
                 }
-        
+    
                 const deleteCategoryBtn = e.target.closest('.delete-category-btn');
                 if (deleteCategoryBtn && confirm('¿Estás seguro de que quieres eliminar esta categoría y TODOS sus recursos?')) {
                     const { categoryId } = deleteCategoryBtn.dataset;
                     repositoryData = repositoryData.filter(c => c.id !== categoryId);
-                    saveData();
-                    renderPage();
+                    await saveData();
                 }
             });
-        
-            // --- BÚSQUEDA Y SCROLL ---
+            
             searchBar.addEventListener('input', () => {
                 const searchTerm = searchBar.value.toLowerCase().trim();
                 document.querySelectorAll('.category-section').forEach(section => {
@@ -459,21 +464,20 @@
                     section.style.display = title.includes(searchTerm) ? 'block' : 'none';
                 });
             });
-        
-            document.body.addEventListener('click', e => {
-                if (e.target.matches('nav a[href^="#"]')) {
-                    e.preventDefault();
-                    const targetElement = document.querySelector(e.target.getAttribute('href'));
-                    if (targetElement) {
-                        window.scrollTo({ top: targetElement.offsetTop - 120, behavior: 'smooth' });
-                    }
+    
+            // --- INICIO DE LA APP ---
+            onSnapshot(docRef, (docSnap) => {
+                console.log("Datos recibidos de Firestore en tiempo real.");
+                if (docSnap.exists() && docSnap.data().categories) {
+                    repositoryData = docSnap.data().categories;
+                } else {
+                    repositoryData = defaultData;
+                    saveData(); // Guarda los datos por defecto si el documento no existe
                 }
+                renderPage();
             });
-        
-            // --- INICIO DE LA APLICACIÓN ---
-            loadData();
-            renderPage();
-        });
-        </script>
+        }
+    ;
+    </script>
 </body>
 </html>
