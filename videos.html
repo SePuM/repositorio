@@ -274,7 +274,7 @@
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     
-        // ✅ PEGA AQUÍ TU OBJETO firebaseConfig
+        
         const firebaseConfig = {
             apiKey: "AIzaSyDs1Xn8fUlY3IL_6Sg2RJh8YqiaVJVk0pQ",
             authDomain: "repositorio-90921.firebaseapp.com",
@@ -337,6 +337,7 @@
             };
     
             const renderPage = () => {
+                repositoryData.sort((a, b) => a.name.localeCompare(b.name));
                 categoriesContainer.innerHTML = '';
                 navLinksContainer.innerHTML = '';
                 resourceCategorySelect.innerHTML = '<option value="">Selecciona una categoría</option>';
@@ -481,3 +482,4 @@
     </script>
 </body>
 </html>
+
