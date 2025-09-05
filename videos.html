@@ -374,15 +374,16 @@
     if (!container) return;
 
     const scrollLeft = container.scrollLeft;
-    const maxScrollLeft = container.scrollWidth - container.clientWidth;
-    const tolerance = 5; 
+    const addButton = document.querySelector(".add-category"); // ajusta al selector real
+    const buttonWidth = addButton ? addButton.offsetWidth : 0;
 
-    // ✅ CORRECCIÓN: Se añade la misma tolerancia a la flecha izquierda
+    const maxScrollLeft = (container.scrollWidth - buttonWidth) - container.clientWidth;
+    const tolerance = 5;
+
     scrollLeftBtn.classList.toggle('hidden', scrollLeft < 1);
-
-    // Derecha mantiene la tolerancia para evitar problemas al final
     scrollRightBtn.classList.toggle('hidden', scrollLeft >= maxScrollLeft - tolerance);
 };
+
 
         const renderPage = () => {
             repositoryData.sort((a, b) => a.name.localeCompare(b.name));
@@ -543,6 +544,7 @@ window.addEventListener('resize', updateArrowVisibility);
 </script>
 </body>
 </html>
+
 
 
 
