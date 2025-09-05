@@ -258,162 +258,185 @@ input, select, textarea {
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- INICIALIZACIÓN Y ELEMENTOS ---
-            const addResourceBtn = document.getElementById('add-resource-btn');
-            const addCategoryBtn = document.createElement('button');
-            addCategoryBtn.id = 'add-category-btn';
-            addCategoryBtn.className = 'add-btn text-white px-4 py-2 rounded-lg flex items-center';
-            addCategoryBtn.innerHTML = '<i data-feather="plus" class="mr-2"></i> Añadir Categoría';
+    <script type="module">
+    // Importar funciones de Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // ✅ PEGA AQUÍ TU OBJETO firebaseConfig
+    const firebaseConfig = {
+        apiKey: "TU_API_KEY",
+        authDomain: "TU_AUTH_DOMAIN",
+        projectId: "TU_PROJECT_ID",
+        storageBucket: "TU_STORAGE_BUCKET",
+        messagingSenderId: "TU_MESSAGING_SENDER_ID",
+        appId: "TU_APP_ID"
+    };
+
+    // --- INICIALIZACIÓN ---
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // --- GUARDIA DE AUTENTICACIÓN ---
+    onAuthStateChanged(auth, user => {
+        if (user) {
+            initializeAppLogic();
+        } else {
+            window.location.href = 'index.html';
+        }
+    });
+
+    // --- LÓGICA PRINCIPAL DE LA APLICACIÓN ---
+    function initializeAppLogic() {
+        // Apuntamos al documento "conceptos" en la base de datos
+        const docRef = doc(db, "repositorios", "conceptos");
         
-            const searchBar = document.getElementById('search-bar');
-            const resourceModal = document.getElementById('add-resource-modal');
-            const categoryModal = document.getElementById('add-category-modal');
-            const addResourceForm = document.getElementById('add-resource-form');
-            const addCategoryForm = document.getElementById('add-category-form');
-            const closeModalBtns = document.querySelectorAll('#close-modal, #close-category-modal, #cancel-add, #cancel-category-add');
-            const categoriesContainer = document.getElementById('categories-container');
-            const navLinksContainer = document.getElementById('nav-links-container');
-            const resourceCategorySelect = document.getElementById('resource-category');
-            const iconSelectorContainer = document.getElementById('icon-selector');
+        const addResourceBtn = document.getElementById('add-resource-btn');
+        const addCategoryBtn = document.createElement('button');
+        addCategoryBtn.id = 'add-category-btn';
+        addCategoryBtn.className = 'add-btn text-white px-4 py-2 rounded-lg flex items-center';
+        addCategoryBtn.innerHTML = '<i data-feather="plus" class="mr-2"></i> Añadir Categoría';
         
-            const availableIcons = ['book-open', 'help-circle', 'info', 'message-square', 'hash', 'trending-up', 'layout', 'zap', 'cpu', 'mic', 'package', 'briefcase', 'link', 'dollar-sign', 'bar-chart-2', 'pen-tool', 'users', 'award', 'globe'];
-            let repositoryData = [];
+        const searchBar = document.getElementById('search-bar');
+        const resourceModal = document.getElementById('add-resource-modal');
+        const categoryModal = document.getElementById('add-category-modal');
+        const addResourceForm = document.getElementById('add-resource-form');
+        const addCategoryForm = document.getElementById('add-category-form');
+        const closeModalBtns = document.querySelectorAll('#close-modal, #close-category-modal, #cancel-add, #cancel-category-add');
+        const categoriesContainer = document.getElementById('categories-container');
+        const navLinksContainer = document.getElementById('nav-links-container');
+        const resourceCategorySelect = document.getElementById('resource-category');
+        const iconSelectorContainer = document.getElementById('icon-selector');
+
+        const availableIcons = ['book-open', 'help-circle', 'info', 'message-square', 'hash', 'trending-up', 'layout', 'zap', 'cpu', 'mic', 'package', 'briefcase', 'link', 'dollar-sign', 'bar-chart-2', 'pen-tool', 'users', 'award', 'globe'];
+        let repositoryData = [];
+
+        // Datos por defecto para conceptos
+        const defaultData = [
+            { id: "definiciones-clave", name: "Definiciones Clave", icon: "book-open", resources: [
+                { title: "Marketing de Contenidos", content: "Es una estrategia de marketing enfocada en crear y distribuir contenido valioso, relevante y consistente para atraer y retener a una audiencia claramente definida." },
+            ]},
+            { id: "ideas-de-negocio", name: "Ideas de Negocio", icon: "zap", resources: [] },
+        ];
         
-            // --- DATOS INICIALES PARA CONCEPTOS ---
-            const defaultData = [
-                { id: "definiciones-clave", name: "Definiciones Clave", icon: "book-open", resources: [
-                    { title: "Marketing de Contenidos", content: "Es una estrategia de marketing enfocada en crear y distribuir contenido valioso, relevante y consistente para atraer y retener a una audiencia claramente definida." },
-                ]},
-                { id: "ideas-de-negocio", name: "Ideas de Negocio", icon: "zap", resources: [] },
-            ];
-            
-            // --- MANEJO DE DATOS ---
-            const saveData = () => localStorage.setItem('conceptRepository', JSON.stringify(repositoryData));
-            const loadData = () => {
-                const savedData = localStorage.getItem('conceptRepository');
-                repositoryData = savedData ? JSON.parse(savedData) : defaultData;
-            };
-        
-            // --- RENDERIZADO DE LA PÁGINA ---
-            const renderPage = () => {
-                categoriesContainer.innerHTML = '';
-                navLinksContainer.innerHTML = '';
-                resourceCategorySelect.innerHTML = '<option value="">Selecciona una categoría</option>';
-        
-                repositoryData.forEach(category => {
-                    const section = document.createElement('section');
-                    section.id = category.id;
-                    section.className = 'category-section mb-12';
-                    
-                    const resourcesGrid = category.resources.map((resource, index) => `
-                        <div class="resource-card bg-card p-6 flex flex-col">
-                            <button class="delete-btn delete-resource-btn" data-category-id="${category.id}" data-resource-index="${index}" title="Eliminar concepto"><i data-feather="trash-2"></i></button>
-                            <div class="flex items-center mb-3">
-                                <i data-feather="${category.icon || 'hash'}" class="text-purple-400 mr-3"></i>
-                                <h3 class="text-lg font-semibold text-slate-100">${resource.title}</h3>
-                            </div>
-                            <p class="text-slate-300 flex-grow whitespace-pre-wrap break-words">${resource.content}</p>
-                        </div>
-                    `).join('');
-        
-                    // ✅ CORRECCIÓN: Se añadió la clase 'section-title' que faltaba
-                    section.innerHTML = `<div class="category-header"><h2 class="text-2xl font-bold section-title">${category.name}</h2><button class="delete-btn delete-category-btn" data-category-id="${category.id}" title="Eliminar categoría"><i data-feather="trash-2"></i></button></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${resourcesGrid}</div>`;
-                    categoriesContainer.appendChild(section);
-        
-                    const navLink = document.createElement('a');
-                    navLink.href = `#${category.id}`;
-                    navLink.className = 'category-link px-4 py-2';
-                    navLink.textContent = category.name;
-                    navLinksContainer.appendChild(navLink);
-        
-                    const option = document.createElement('option');
-                    option.value = category.id;
-                    option.textContent = category.name;
-                    resourceCategorySelect.appendChild(option);
-                });
+        const saveData = async () => {
+            await setDoc(docRef, { categories: repositoryData });
+        };
+
+        const renderPage = () => {
+            categoriesContainer.innerHTML = '';
+            navLinksContainer.innerHTML = '';
+            resourceCategorySelect.innerHTML = '<option value="">Selecciona una categoría</option>';
+
+            repositoryData.forEach(category => {
+                const section = document.createElement('section');
+                section.id = category.id;
+                section.className = 'category-section mb-12';
                 
-                navLinksContainer.appendChild(addCategoryBtn);
-                feather.replace();
-            };
-            
-            const renderIconSelector = () => {
-                iconSelectorContainer.innerHTML = '';
-                availableIcons.forEach((icon, i) => {
-                    iconSelectorContainer.innerHTML += `<label class="icon-option"><input type="radio" name="category-icon" value="${icon}" ${i===0?'checked':''}><div class="icon-preview" title="${icon}"><i data-feather="${icon}"></i></div></label>`;
-                });
-                feather.replace();
-            };
-        
-            const closeAllModals = () => { resourceModal.classList.add('hidden'); categoryModal.classList.add('hidden'); };
-            addResourceBtn.addEventListener('click', () => resourceModal.classList.remove('hidden'));
-            addCategoryBtn.addEventListener('click', () => { renderIconSelector(); categoryModal.classList.remove('hidden'); });
-            closeModalBtns.forEach(btn => btn.addEventListener('click', closeAllModals));
-        
-            addResourceForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const title = document.getElementById('resource-title').value;
-                const content = document.getElementById('resource-content').value;
-                const categoryId = resourceCategorySelect.value;
-                if (!categoryId) return;
-                const category = repositoryData.find(c => c.id === categoryId);
-                if(category) {
-                    category.resources.unshift({ title, content });
-                    saveData();
-                    renderPage();
-                    closeAllModals();
-                    addResourceForm.reset();
-                }
-            });
-        
-            addCategoryForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const name = document.getElementById('category-name').value;
-                const selectedIcon = document.querySelector('input[name="category-icon"]:checked').value;
-                const id = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-                if (repositoryData.some(c => c.id === id)) return;
-                repositoryData.push({ id, name, icon: selectedIcon, resources: [] });
-                saveData();
-                renderPage();
-                closeAllModals();
-                addCategoryForm.reset();
-            });
-        
-            categoriesContainer.addEventListener('click', e => {
-                const delResBtn = e.target.closest('.delete-resource-btn');
-                if (delResBtn && confirm('¿Eliminar este concepto?')) {
-                    const { categoryId, resourceIndex } = delResBtn.dataset;
-                    const cat = repositoryData.find(c => c.id === categoryId);
-                    cat.resources.splice(resourceIndex, 1);
-                    saveData();
-                    renderPage();
-                }
-                const delCatBtn = e.target.closest('.delete-category-btn');
-                if (delCatBtn && confirm('¿Eliminar esta categoría y todo su contenido?')) {
-                    const { categoryId } = delCatBtn.dataset;
-                    repositoryData = repositoryData.filter(c => c.id !== categoryId);
-                    saveData();
-                    renderPage();
-                }
+                // Diseño de tarjeta para texto
+                const resourcesGrid = category.resources.map((resource, index) => `
+                    <div class="resource-card bg-card p-6 flex flex-col">
+                        <button class="delete-btn delete-resource-btn" data-category-id="${category.id}" data-resource-index="${index}" title="Eliminar concepto"><i data-feather="trash-2"></i></button>
+                        <div class="flex items-center mb-3">
+                            <i data-feather="${category.icon || 'hash'}" class="text-purple-400 mr-3"></i>
+                            <h3 class="text-lg font-semibold text-slate-100">${resource.title}</h3>
+                        </div>
+                        <p class="text-slate-300 flex-grow whitespace-pre-wrap break-words">${resource.content}</p>
+                    </div>
+                `).join('');
+
+                section.innerHTML = `<div class="category-header"><h2 class="text-2xl font-bold section-title">${category.name}</h2><button class="delete-btn delete-category-btn" data-category-id="${category.id}" title="Eliminar categoría"><i data-feather="trash-2"></i></button></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${resourcesGrid}</div>`;
+                categoriesContainer.appendChild(section);
+
+                const navLink = document.createElement('a');
+                navLink.href = `#${category.id}`;
+                navLink.className = 'category-link px-4 py-2';
+                navLink.textContent = category.name;
+                navLinksContainer.appendChild(navLink);
+
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                resourceCategorySelect.appendChild(option);
             });
             
-            searchBar.addEventListener('input', () => {
-                const searchTerm = searchBar.value.toLowerCase().trim();
-                document.querySelectorAll('.category-section').forEach(section => {
-                    const titleElement = section.querySelector('.section-title');
-                    if (titleElement) {
-                        const title = titleElement.textContent.toLowerCase();
-                        section.style.display = title.includes(searchTerm) ? 'block' : 'none';
-                    }
-                });
-            });
-        
-            // --- INICIO DE LA APLICACIÓN ---
-            loadData();
-            renderPage();
+            navLinksContainer.appendChild(addCategoryBtn);
             feather.replace();
+        };
+        
+        const renderIconSelector = () => {
+            iconSelectorContainer.innerHTML = '';
+            availableIcons.forEach((icon, i) => {
+                iconSelectorContainer.innerHTML += `<label class="icon-option"><input type="radio" name="category-icon" value="${icon}" ${i===0?'checked':''}><div class="icon-preview" title="${icon}"><i data-feather="${icon}"></i></div></label>`;
+            });
+            feather.replace();
+        };
+
+        const closeAllModals = () => { resourceModal.classList.add('hidden'); categoryModal.classList.add('hidden'); };
+        addResourceBtn.addEventListener('click', () => resourceModal.classList.remove('hidden'));
+        addCategoryBtn.addEventListener('click', () => { renderIconSelector(); categoryModal.classList.remove('hidden'); });
+        closeModalBtns.forEach(btn => btn.addEventListener('click', closeAllModals));
+
+        // Lógica para añadir conceptos (título y contenido)
+        addResourceForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('resource-title').value;
+            const content = document.getElementById('resource-content').value;
+            const categoryId = resourceCategorySelect.value;
+            if (!categoryId) { alert('Por favor, selecciona una categoría'); return; }
+            const category = repositoryData.find(c => c.id === categoryId);
+            if(category) {
+                category.resources.unshift({ title, content });
+                await saveData();
+                closeAllModals();
+                addResourceForm.reset();
+            }
         });
-        </script>
+
+        addCategoryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('category-name').value;
+            const selectedIconInput = document.querySelector('input[name="category-icon"]:checked');
+            if (!name || !selectedIconInput) { alert('Por favor, completa todos los campos.'); return; }
+            const selectedIcon = selectedIconInput.value;
+            const id = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+            if (repositoryData.some(c => c.id === id)) { alert('Ya existe una categoría con un nombre similar.'); return; }
+            repositoryData.push({ id, name, icon: selectedIcon, resources: [] });
+            await saveData();
+            closeAllModals();
+            addCategoryForm.reset();
+        });
+
+        categoriesContainer.addEventListener('click', async (e) => {
+            const delResBtn = e.target.closest('.delete-resource-btn');
+            if (delResBtn && confirm('¿Eliminar este concepto?')) {
+                const { categoryId, resourceIndex } = delResBtn.dataset;
+                const cat = repositoryData.find(c => c.id === categoryId);
+                cat.resources.splice(resourceIndex, 1);
+                await saveData();
+            }
+            const delCatBtn = e.target.closest('.delete-category-btn');
+            if (delCatBtn && confirm('¿Eliminar esta categoría y todo su contenido?')) {
+                const { categoryId } = delCatBtn.dataset;
+                repositoryData = repositoryData.filter(c => c.id !== categoryId);
+                await saveData();
+            }
+        });
+        
+        onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists() && docSnap.data().categories) {
+                repositoryData = docSnap.data().categories;
+            } else {
+                repositoryData = defaultData;
+                saveData();
+            }
+            renderPage();
+        });
+    }
+});
+</script>
 </body>
+
 </html>
