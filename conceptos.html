@@ -326,6 +326,7 @@ input, select, textarea {
         };
 
         const renderPage = () => {
+            repositoryData.sort((a, b) => a.name.localeCompare(b.name));
             categoriesContainer.innerHTML = '';
             navLinksContainer.innerHTML = '';
             resourceCategorySelect.innerHTML = '<option value="">Selecciona una categoría</option>';
@@ -440,5 +441,6 @@ input, select, textarea {
 </body>
 
 </html>
+
 
 
