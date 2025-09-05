@@ -209,6 +209,23 @@ input, select, textarea {
     background: linear-gradient(90deg, #8B5CF6, #7C3AED);
     border-radius: 2px;
 }
+        /* Estilos para las flechas del carrusel */
+.scroll-arrow {
+    background: rgba(30, 30, 46, 0.7);
+    border: 1px solid rgba(139, 92, 246, 0.5);
+    color: #e2e8f0;
+    border-radius: 50%;
+    padding: 8px;
+    flex-shrink: 0; /* Evita que las flechas se encojan */
+    transition: all 0.2s ease;
+}
+.scroll-arrow:hover {
+    background: #8B5CF6;
+    color: white;
+}
+.scroll-arrow.hidden {
+    display: none;
+}
     </style>
 </head>
 <body class="gradient-bg text-slate-200">
@@ -230,9 +247,22 @@ input, select, textarea {
         </div>
     </header>
 
-    <nav class="bg-slate-900/30 backdrop-blur-md border-b border-purple-500/20 py-4">
-        <div class="container mx-auto px-4"><div id="nav-links-container" class="flex flex-nowrap overflow-x-auto justify-center gap-2 md:gap-4"></div></div>
-    </nav>
+    <nav class="bg-slate-900/30 backdrop-blur-md border-b border-purple-500/20 py-2">
+    <div class="container mx-auto px-4 flex items-center gap-2">
+        
+        <button id="scroll-left-btn" class="scroll-arrow hidden">
+            <i data-feather="chevron-left"></i>
+        </button>
+
+        <div id="nav-links-container" class="flex-grow flex flex-nowrap overflow-x-auto justify-start md:justify-center gap-2 md:gap-4">
+            </div>
+
+        <button id="scroll-right-btn" class="scroll-arrow hidden">
+            <i data-feather="chevron-right"></i>
+        </button>
+
+    </div>
+</nav>
 
     <main class="container mx-auto px-4 py-8">
         <div class="flex justify-between items-center mb-6">
@@ -297,7 +327,8 @@ input, select, textarea {
 
     // --- LÓGICA PRINCIPAL DE LA APLICACIÓN ---
     function initializeAppLogic() {
-        // Apuntamos al documento "conceptos" en la base de datos
+        const scrollLeftBtn = document.getElementById('scroll-left-btn');
+const scrollRightBtn = document.getElementById('scroll-right-btn');
         const docRef = doc(db, "repositorios", "conceptos");
         
         const addResourceBtn = document.getElementById('add-resource-btn');
@@ -331,6 +362,17 @@ input, select, textarea {
         const saveData = async () => {
             await setDoc(docRef, { categories: repositoryData });
         };
+        const updateArrowVisibility = () => {
+    const container = navLinksContainer;
+    if (!container) return;
+
+    const scrollLeft = container.scrollLeft;
+    const maxScrollLeft = container.scrollWidth - container.clientWidth;
+    const tolerance = 2; // Pequeño margen para cálculos
+
+    scrollLeftBtn.classList.toggle('hidden', scrollLeft <= tolerance);
+    scrollRightBtn.classList.toggle('hidden', scrollLeft >= maxScrollLeft - tolerance);
+};
 
         const renderPage = () => {
             repositoryData.sort((a, b) => a.name.localeCompare(b.name));
@@ -372,6 +414,7 @@ input, select, textarea {
             
             navLinksContainer.appendChild(addCategoryBtn);
             feather.replace();
+            setTimeout(updateArrowVisibility, 100);
         };
         
         const renderIconSelector = () => {
@@ -402,6 +445,18 @@ input, select, textarea {
                 addResourceForm.reset();
             }
         });
+
+        // Listeners para las flechas y el scroll
+scrollLeftBtn.addEventListener('click', () => {
+    navLinksContainer.scrollBy({ left: -300, behavior: 'smooth' });
+});
+
+scrollRightBtn.addEventListener('click', () => {
+    navLinksContainer.scrollBy({ left: 300, behavior: 'smooth' });
+});
+
+navLinksContainer.addEventListener('scroll', updateArrowVisibility);
+window.addEventListener('resize', updateArrowVisibility);
 
         addCategoryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -448,6 +503,7 @@ input, select, textarea {
 </body>
 
 </html>
+
 
 
 
